@@ -7,8 +7,8 @@ use crate::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Body<P> {
-    pub msg_id: Option<usize>,
-    pub in_reply_to: Option<usize>,
+    pub(crate) msg_id: Option<usize>,
+    pub(crate) in_reply_to: Option<usize>,
 
     #[serde(flatten)]
     pub payload: P,
@@ -16,8 +16,8 @@ pub struct Body<P> {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message<P> {
-    pub src: String,
-    pub dest: String,
+    pub(crate) src: String,
+    pub(crate) dest: String,
     pub body: Body<P>,
 }
 
