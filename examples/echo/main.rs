@@ -26,17 +26,18 @@ impl MyNode {
     where
         E: Egress,
     {
-        let MyEcho::Echo { echo } = &msg.body.payload else {
-            bail!("Not an echo")
-        };
+        match &msg.body.payload {
+            MyEcho::Echo { echo } => {
+                let pld = MyEcho::EchoOk { echo: echo.clone() };
+                let reply = msg.into_reply(&pld);
 
-        let pld = MyEcho::EchoOk { echo: echo.clone() };
-        let reply = msg.into_reply(&pld);
+                let json = serde_json::to_string(&reply)?;
+                egress.send(json).unwrap();
 
-        let json = serde_json::to_string(&reply)?;
-        egress.send(json).unwrap();
-
-        Ok(())
+                Ok(())
+            }
+            MyEcho::EchoOk { .. } => Err(anyhow::anyhow!("We cannot handle EchoOk")),
+        }
     }
 }
 

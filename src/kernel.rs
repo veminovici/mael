@@ -60,8 +60,12 @@ where
         let mut node = self.create_node()?;
 
         for line in &self.ingress {
-            let msg = serde_json::from_str::<Message<N::Payload>>(&line).unwrap();
-            node.handle_message(msg, &self.egress)?;
+            if let Ok(msg) = serde_json::from_str::<Message<N::Payload>>(&line) {
+                match node.handle_message(msg, &self.egress) {
+                    Ok(_) => {}
+                    Err(_) => break,
+                }
+            }
         }
 
         Ok(())
