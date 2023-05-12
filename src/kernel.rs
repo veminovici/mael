@@ -55,7 +55,9 @@ where
                 self.egress.reply_init_msg(msg)?;
                 Ok(node)
             }
-            crate::payload::Init::InitOk => Err(anyhow::anyhow!("We are expecting an INIT message")),
+            crate::payload::Init::InitOk => {
+                Err(anyhow::anyhow!("We are expecting an INIT message"))
+            }
         }
     }
 
