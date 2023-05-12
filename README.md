@@ -14,11 +14,13 @@ The implementation for the [Challenge #1: Echo](https://fly.io/dist-sys/1/) can 
 
 ```rust
 pld!(
-    enum MyEcho {
+    enum EchoPayload {
         Echo { echo: String },
         EchoOk { echo: String },
     }
 );
+
+StdKernel::<EchoNode>::spawn_and_run().unwrap();
 ```
 
 #### Build and Run
@@ -32,6 +34,17 @@ cargo build --examples
 
 ## Challenge #2: Unique Identifier
 The implementation for the [Challenge #2: Unique ID Generatio](https://fly.io/dist-sys/2/) can be found in the [unique](./examples/unique/main.rs) file.
+
+```rust
+pld!(
+    enum UniquePayload {
+        Generate,
+        GenerateOk { id: String },
+    }
+);
+
+StdKernel::<UniqueNode>::spawn_and_run().unwrap();
+```
 
 #### Build and Run
 To build and run any of the examples, run in your command line the following commands:

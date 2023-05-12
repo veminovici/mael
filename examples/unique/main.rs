@@ -1,7 +1,5 @@
-use std::fmt::format;
-
 use mael::{egress::Egress, kernel::StdKernel, message::Message, node::Node, pld};
-use ulid::{Generator, Ulid};
+use ulid::Generator;
 
 pld!(
     enum UniquePayload {
@@ -34,7 +32,7 @@ impl UniqueNode {
 
                 Ok(())
             }
-            UniquePayload::GenerateOk { id } => Err(anyhow::anyhow!("We cannot handle GenerateOk")),
+            UniquePayload::GenerateOk { .. } => Err(anyhow::anyhow!("We cannot handle GenerateOk")),
         }
     }
 

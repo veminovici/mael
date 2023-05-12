@@ -1,25 +1,25 @@
 use mael::{egress::Egress, kernel::StdKernel, message::Message, node::Node, pld};
 
 pld!(
-    enum MyEcho {
+    enum EchoPayload {
         Echo { echo: String },
         EchoOk { echo: String },
     }
 );
 
-struct MyNode {
+struct EchoNode {
     node_id: String,
     node_ids: Vec<String>,
 }
 
-impl MyNode {
-    pub fn handle_echo<E>(&mut self, egress: &E, msg: Message<MyEcho>) -> anyhow::Result<()>
+impl EchoNode {
+    pub fn handle_echo<E>(&mut self, egress: &E, msg: Message<EchoPayload>) -> anyhow::Result<()>
     where
         E: Egress,
     {
         match &msg.body.payload {
-            MyEcho::Echo { echo } => {
-                let pld = MyEcho::EchoOk { echo: echo.clone() };
+            EchoPayload::Echo { echo } => {
+                let pld = EchoPayload::EchoOk { echo: echo.clone() };
                 let reply = msg.into_reply(&pld);
 
                 let json = serde_json::to_string(&reply)?;
@@ -27,16 +27,16 @@ impl MyNode {
 
                 Ok(())
             }
-            MyEcho::EchoOk { .. } => Err(anyhow::anyhow!("We cannot handle EchoOk")),
+            EchoPayload::EchoOk { .. } => Err(anyhow::anyhow!("We cannot handle EchoOk")),
         }
     }
 }
 
-impl Node for MyNode {
-    type Payload = MyEcho;
+impl Node for EchoNode {
+    type Payload = EchoPayload;
 
     fn from_init(node_id: &str, node_ids: &[String]) -> Self {
-        MyNode {
+        EchoNode {
             node_id: node_id.to_string(),
             node_ids: node_ids.to_vec(),
         }
@@ -53,5 +53,5 @@ impl Node for MyNode {
 
 fn main() {
     eprintln!("Starting Echo ...");
-    StdKernel::<MyNode>::spawn_and_run().unwrap();
+    StdKernel::<EchoNode>::spawn_and_run().unwrap();
 }
