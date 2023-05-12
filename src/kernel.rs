@@ -5,6 +5,7 @@ use anyhow::bail;
 use crate::{
     egress::StdEgress,
     ingress::StdIngress,
+    message::Message,
     node::Node,
     payload::{EgressInitExt, IngressInitExt},
 };
@@ -14,6 +15,7 @@ where
     N: Node,
 {
     fn create_node(&self) -> anyhow::Result<N>;
+    fn run_loop(&self) -> anyhow::Result<()>;
 }
 
 pub struct StdKernel<N> {
@@ -52,5 +54,16 @@ where
             }
             crate::payload::Init::InitOk => bail!("We are expecting an INIT message"),
         }
+    }
+
+    fn run_loop(&self) -> anyhow::Result<()> {
+        let mut node = self.create_node()?;
+
+        for line in &self.ingress {
+            let msg = serde_json::from_str::<Message<N::Payload>>(&line).unwrap();
+            node.handle_message(msg, &self.egress)?;
+        }
+
+        Ok(())
     }
 }
