@@ -27,11 +27,16 @@ where
     P: Payload,
 {
     pub fn into_reply(self, payload: &P) -> Self {
+        let next_msgid = self.body.msg_id.map(|i| i + 1);
+        self.into_reply_with_msgid(payload, next_msgid)
+    }
+
+    pub fn into_reply_with_msgid(self, payload: &P, msg_id: Option<usize>) -> Self {
         Message {
             src: self.dest.clone(),
             dest: self.src.clone(),
             body: Body {
-                msg_id: self.body.msg_id.map(|i| i + 1),
+                msg_id,
                 in_reply_to: self.body.msg_id,
                 payload: payload.clone(),
             },
