@@ -1,6 +1,3 @@
-//use std::io::{BufRead, Write};
-
-use anyhow::bail;
 use mael::{
     egress::Egress,
     kernel::{Kernel, StdKernel},
