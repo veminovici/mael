@@ -26,9 +26,14 @@ impl MyNode {
     where
         E: Egress,
     {
-        let reply = build_reply_echo(msg).unwrap();
-        let json = serde_json::to_string(&reply).unwrap();
-        eprintln!("Sending msg (ECHO_OK): {json}");
+        let MyEcho::Echo { echo } = &msg.body.payload else {
+            bail!("Not an echo")
+        };
+
+        let pld = MyEcho::EchoOk { echo: echo.clone() };
+        let reply = msg.into_reply(&pld);
+
+        let json = serde_json::to_string(&reply)?;
         egress.send(json).unwrap();
 
         Ok(())
@@ -49,16 +54,6 @@ impl Node for MyNode {
     ) -> anyhow::Result<()> {
         self.handle_echo(egress, msg)
     }
-}
-
-fn build_reply_echo(msg: Message<MyEcho>) -> anyhow::Result<Message<MyEcho>> {
-    let MyEcho::Echo { echo } = &msg.body.payload else {
-        bail!("Not an echo")
-    };
-
-    let pld = MyEcho::EchoOk { echo: echo.clone() };
-    let reply = msg.into_reply(&pld);
-    Ok(reply)
 }
 
 fn main() {

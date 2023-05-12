@@ -37,8 +37,6 @@ pub trait IngressInitExt: Ingress {
     fn read_init_msg(&self) -> anyhow::Result<Message<Init>> {
         let init = self.recv()?;
         let msg = serde_json::from_str::<Message<Init>>(&init)?;
-        eprintln!("Read msg (INIT): {msg:?}");
-
         Ok(msg)
     }
 }
@@ -64,7 +62,6 @@ pub trait EgressInitExt: Egress {
         };
 
         let json = serde_json::to_string(&reply)?;
-        eprintln!("Sending msg (INIT_OK): {json}");
         self.send(json)?;
 
         Ok(())
