@@ -1,6 +1,6 @@
 //use std::io::{BufRead, Write};
 
-use mael::{egress::{self, Egress, StdEgress}, ingress::{self, StdIngress}, message::{Message, Body}, payload::Init, pld};
+use mael::{egress::{self, Egress, StdEgress}, ingress::{self, StdIngress}, message::{Message, Body}, payload::{Init, IngressInitExt, EgressInitExt}, pld};
 use mael::ingress::Ingress;
 
 pld!(
@@ -9,32 +9,6 @@ pld!(
         EchoOk { echo: String },
     }
 );
-
-fn read_init(ingress: &StdIngress) -> anyhow::Result<Message<Init>> {
-    let init = ingress.recv().unwrap();
-    let msg = serde_json::from_str::<Message<Init>>(&init).unwrap();
-    eprintln!("Read msg (INIT): {msg:?}");
-
-    Ok(msg)
-}
-
-fn reply_init(egress: &StdEgress, msg: Message<Init>) -> anyhow::Result<()> {
-    let reply = Message {
-        src: msg.dest.clone(),
-        dest: msg.src.clone(),
-        body: Body {
-            msg_id: msg.body.msg_id.map(|i| i + 1),
-            in_reply_to: msg.body.msg_id,
-            payload: Init::InitOk,
-        }
-    };
-
-    let json = serde_json::to_string(&reply).unwrap();
-    eprintln!("Sending msg (INIT_OK): {json}");
-    egress.send(json).unwrap();
-
-    Ok(())
-}
 
 fn read_echo(ingress: &StdIngress) -> anyhow::Result<Message<MyEcho>> {
     let echo = ingress.recv().unwrap();
@@ -74,8 +48,8 @@ fn main() {
     let egress = egress::StdEgress::spawn();
 
     // Init
-    let msg = read_init(&ingress).unwrap();
-    reply_init(&egress, msg).unwrap();
+    let msg = ingress.read_init_msg().unwrap();
+    egress.reply_init_msg(msg).unwrap();
 
     // ECHO
     let msg = read_echo(&ingress).unwrap();
