@@ -51,7 +51,7 @@ where
         let msg = self.ingress.read_init_msg()?;
         match &msg.body.payload {
             crate::payload::Init::Init { node_id, node_ids } => {
-                let node = N::from_init(node_id.clone(), node_ids.clone());
+                let node = N::from_init(node_id, node_ids);
                 self.egress.reply_init_msg(msg)?;
                 Ok(node)
             }

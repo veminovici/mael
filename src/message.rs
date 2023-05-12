@@ -53,7 +53,7 @@ impl Message<Init> {
             bail!("expected init as the first message");
         };
 
-        let node = N::from_init(node_id.clone(), node_ids.clone());
+        let node = N::from_init(node_id, node_ids);
         Ok(node)
     }
 }

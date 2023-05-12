@@ -41,8 +41,11 @@ impl MyNode {
 impl Node for MyNode {
     type Payload = MyEcho;
 
-    fn from_init(node_id: String, node_ids: Vec<String>) -> Self {
-        MyNode { node_id, node_ids }
+    fn from_init(node_id: &String, node_ids: &Vec<String>) -> Self {
+        MyNode {
+            node_id: node_id.clone(),
+            node_ids: node_ids.clone(),
+        }
     }
 
     fn handle_message<E: Egress>(
