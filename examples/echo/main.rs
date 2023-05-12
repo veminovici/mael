@@ -1,10 +1,4 @@
-use mael::{
-    egress::Egress,
-    kernel::StdKernel,
-    message::Message,
-    node::Node,
-    pld,
-};
+use mael::{egress::Egress, kernel::StdKernel, message::Message, node::Node, pld};
 
 pld!(
     enum MyEcho {
@@ -41,10 +35,10 @@ impl MyNode {
 impl Node for MyNode {
     type Payload = MyEcho;
 
-    fn from_init(node_id: &String, node_ids: &Vec<String>) -> Self {
+    fn from_init(node_id: &str, node_ids: &[String]) -> Self {
         MyNode {
-            node_id: node_id.clone(),
-            node_ids: node_ids.clone(),
+            node_id: node_id.to_string(),
+            node_ids: node_ids.to_vec(),
         }
     }
 
