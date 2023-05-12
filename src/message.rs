@@ -26,7 +26,7 @@ impl<P> Message<P>
 where
     P: Payload,
 {
-    pub fn build_reply_with_payload(&self, payload: &P) -> Self {
+    pub fn into_reply(self, payload: &P) -> Self {
         Message {
             src: self.dest.clone(),
             dest: self.src.clone(),
@@ -34,23 +34,6 @@ where
                 msg_id: self.body.msg_id.map(|i| i + 1),
                 in_reply_to: self.body.msg_id,
                 payload: payload.clone(),
-            },
-        }
-    }
-
-    pub fn into_reply(&self, payload: P) -> Self {
-        let next_id = self.body.msg_id.map(|id| id + 1);
-        self.into_reply_with_id(payload, next_id)
-    }
-
-    pub fn into_reply_with_id(&self, payload: P, msg_id: Option<usize>) -> Self {
-        Message {
-            src: self.dest.clone(),
-            dest: self.src.clone(),
-            body: Body {
-                msg_id,
-                in_reply_to: self.body.in_reply_to,
-                payload,
             },
         }
     }
@@ -93,7 +76,7 @@ mod utests {
             },
         };
 
-        let reply = msg.into_reply(reply_payload);
+        let reply = msg.into_reply(&reply_payload);
 
         assert_eq!(dest, reply.src);
         assert_eq!(src, reply.dest);
@@ -121,7 +104,7 @@ mod utests {
             },
         };
 
-        let reply = msg.into_reply(reply_payload);
+        let reply = msg.into_reply(&reply_payload);
 
         assert_eq!(dest, reply.src);
         assert_eq!(src, reply.dest);

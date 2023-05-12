@@ -47,7 +47,7 @@ impl<I> IngressInitExt for I where I: Ingress {}
 
 pub trait EgressInitExt: Egress {
     fn reply_init(&self, msg: Message<Init>) -> anyhow::Result<()> {
-        let reply = msg.into_reply(Init::InitOk);
+        let reply = msg.into_reply(&Init::InitOk);
         let json = serde_json::to_string(&reply)?;
         self.send(json)
     }

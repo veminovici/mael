@@ -4,8 +4,8 @@ use mael::ingress::Ingress;
 use mael::{
     egress::{self, Egress, StdEgress},
     ingress::{self, StdIngress},
-    message::{Body, Message},
-    payload::{EgressInitExt, IngressInitExt, Init},
+    message::Message,
+    payload::{EgressInitExt, IngressInitExt},
     pld,
 };
 
@@ -24,17 +24,17 @@ fn read_echo(ingress: &StdIngress) -> anyhow::Result<Message<MyEcho>> {
     Ok(msg)
 }
 
-fn build_reply_echo(msg: &Message<MyEcho>) -> anyhow::Result<Message<MyEcho>> {
+fn build_reply_echo(msg: Message<MyEcho>) -> anyhow::Result<Message<MyEcho>> {
     let MyEcho::Echo { echo } = &msg.body.payload else {
         panic!("Not an echo");
     };
 
     let pld = MyEcho::EchoOk { echo: echo.clone() };
-    let reply = msg.build_reply_with_payload(&pld);
+    let reply = msg.into_reply(&pld);
     Ok(reply)
 }
 
-fn reply_echo(egress: &StdEgress, msg: &Message<MyEcho>) -> anyhow::Result<()> {
+fn reply_echo(egress: &StdEgress, msg: Message<MyEcho>) -> anyhow::Result<()> {
     let reply = build_reply_echo(msg).unwrap();
     let json = serde_json::to_string(&reply).unwrap();
     eprintln!("Sending msg (ECHO_OK): {json}");
@@ -56,6 +56,6 @@ fn main() {
     for _i in 0..100 {
         // ECHO
         let msg = read_echo(&ingress).unwrap();
-        reply_echo(&egress, &msg).unwrap();
+        reply_echo(&egress, msg).unwrap();
     }
 }
