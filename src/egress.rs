@@ -20,6 +20,8 @@ impl StdEgress {
             let mut stdout = std::io::stdout().lock();
 
             for msg in rx {
+                eprintln!("NET SEND: {msg:?}");
+
                 writeln!(&mut stdout, "{msg}").unwrap();
                 //stdout.write_all(b"\n").unwrap();
             }

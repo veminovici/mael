@@ -1,7 +1,13 @@
 //use std::io::{BufRead, Write};
 
-use mael::{egress::{self, Egress, StdEgress}, ingress::{self, StdIngress}, message::{Message, Body}, payload::{Init, IngressInitExt, EgressInitExt}, pld};
 use mael::ingress::Ingress;
+use mael::{
+    egress::{self, Egress, StdEgress},
+    ingress::{self, StdIngress},
+    message::{Body, Message},
+    payload::{EgressInitExt, IngressInitExt, Init},
+    pld,
+};
 
 pld!(
     enum MyEcho {
@@ -18,22 +24,18 @@ fn read_echo(ingress: &StdIngress) -> anyhow::Result<Message<MyEcho>> {
     Ok(msg)
 }
 
-fn reply_echo(egress: &StdEgress, msg: &Message<MyEcho>) -> anyhow::Result<()> {
+fn build_reply_echo(msg: &Message<MyEcho>) -> anyhow::Result<Message<MyEcho>> {
     let MyEcho::Echo { echo } = &msg.body.payload else {
         panic!("Not an echo");
     };
 
-    // Prepare the reply.
-    let reply = Message {
-        src: msg.dest.clone(),
-        dest: msg.src.clone(),
-        body: Body {
-            msg_id: msg.body.msg_id.map(|i| i + 1),
-            in_reply_to: msg.body.msg_id,
-            payload: MyEcho::EchoOk { echo: echo.clone() },
-        }
-    };
+    let pld = MyEcho::EchoOk { echo: echo.clone() };
+    let reply = msg.build_reply_with_payload(&pld);
+    Ok(reply)
+}
 
+fn reply_echo(egress: &StdEgress, msg: &Message<MyEcho>) -> anyhow::Result<()> {
+    let reply = build_reply_echo(msg).unwrap();
     let json = serde_json::to_string(&reply).unwrap();
     eprintln!("Sending msg (ECHO_OK): {json}");
     egress.send(json).unwrap();
@@ -51,11 +53,9 @@ fn main() {
     let msg = ingress.read_init_msg().unwrap();
     egress.reply_init_msg(msg).unwrap();
 
-    // ECHO
-    let msg = read_echo(&ingress).unwrap();
-    reply_echo(&egress, &msg).unwrap();
-
-    // ECHO
-    let msg = read_echo(&ingress).unwrap();
-    reply_echo(&egress, &msg).unwrap();
+    for _i in 0..100 {
+        // ECHO
+        let msg = read_echo(&ingress).unwrap();
+        reply_echo(&egress, &msg).unwrap();
+    }
 }

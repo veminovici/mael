@@ -1,7 +1,10 @@
 use anyhow::bail;
 use serde::{Deserialize, Serialize};
 
-use crate::{node::Node, payload::Init};
+use crate::{
+    node::Node,
+    payload::{Init, Payload},
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Body<P> {
@@ -19,16 +22,31 @@ pub struct Message<P> {
     pub body: Body<P>,
 }
 
-impl<P> Message<P> {
-    pub fn into_reply(self, payload: P) -> Self {
+impl<P> Message<P>
+where
+    P: Payload,
+{
+    pub fn build_reply_with_payload(&self, payload: &P) -> Self {
+        Message {
+            src: self.dest.clone(),
+            dest: self.src.clone(),
+            body: Body {
+                msg_id: self.body.msg_id.map(|i| i + 1),
+                in_reply_to: self.body.msg_id,
+                payload: payload.clone(),
+            },
+        }
+    }
+
+    pub fn into_reply(&self, payload: P) -> Self {
         let next_id = self.body.msg_id.map(|id| id + 1);
         self.into_reply_with_id(payload, next_id)
     }
 
-    pub fn into_reply_with_id(self, payload: P, msg_id: Option<usize>) -> Self {
+    pub fn into_reply_with_id(&self, payload: P, msg_id: Option<usize>) -> Self {
         Message {
-            src: self.dest,
-            dest: self.src,
+            src: self.dest.clone(),
+            dest: self.src.clone(),
             body: Body {
                 msg_id,
                 in_reply_to: self.body.in_reply_to,

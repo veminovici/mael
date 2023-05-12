@@ -1,6 +1,10 @@
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::{egress::Egress, ingress::Ingress, message::{Message, Body}};
+use crate::{
+    egress::Egress,
+    ingress::Ingress,
+    message::{Body, Message},
+};
 
 pub trait Payload: Clone + std::fmt::Debug + Serialize + DeserializeOwned {}
 impl<P: Clone + std::fmt::Debug + Serialize + DeserializeOwned> Payload for P {}
@@ -34,8 +38,8 @@ pub trait IngressInitExt: Ingress {
         let init = self.recv()?;
         let msg = serde_json::from_str::<Message<Init>>(&init)?;
         eprintln!("Read msg (INIT): {msg:?}");
-    
-        Ok(msg)    
+
+        Ok(msg)
     }
 }
 
@@ -56,13 +60,13 @@ pub trait EgressInitExt: Egress {
                 msg_id: msg.body.msg_id.map(|i| i + 1),
                 in_reply_to: msg.body.msg_id,
                 payload: Init::InitOk,
-            }
+            },
         };
-    
+
         let json = serde_json::to_string(&reply)?;
         eprintln!("Sending msg (INIT_OK): {json}");
         self.send(json)?;
-    
+
         Ok(())
     }
 }
