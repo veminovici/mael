@@ -7,10 +7,7 @@ pld!(
     }
 );
 
-struct EchoNode {
-    node_id: String,
-    node_ids: Vec<String>,
-}
+struct EchoNode;
 
 impl EchoNode {
     pub fn handle_echo<E>(&mut self, egress: &E, msg: Message<EchoPayload>) -> anyhow::Result<()>
@@ -35,11 +32,8 @@ impl EchoNode {
 impl Node for EchoNode {
     type Payload = EchoPayload;
 
-    fn from_init(node_id: &str, node_ids: &[String]) -> Self {
-        EchoNode {
-            node_id: node_id.to_string(),
-            node_ids: node_ids.to_vec(),
-        }
+    fn from_init(_node_id: &str, _node_ids: &[String]) -> Self {
+        EchoNode
     }
 
     fn handle_message<E: Egress>(
