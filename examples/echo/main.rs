@@ -1,9 +1,8 @@
 //use std::io::{BufRead, Write};
 
-use mael::ingress::Ingress;
 use mael::{
     egress::{self, Egress, StdEgress},
-    ingress::{self, StdIngress},
+    ingress,
     message::Message,
     payload::{EgressInitExt, IngressInitExt},
     pld,
@@ -16,10 +15,9 @@ pld!(
     }
 );
 
-fn read_echo(ingress: &StdIngress) -> anyhow::Result<Message<MyEcho>> {
-    let echo = ingress.recv().unwrap();
-    let msg = serde_json::from_str::<Message<MyEcho>>(&echo).unwrap();
-    eprintln!("Read msg (ECHO): {echo}");
+fn read_echo(line: String) -> anyhow::Result<Message<MyEcho>> {
+    let msg = serde_json::from_str::<Message<MyEcho>>(&line).unwrap();
+    eprintln!("Read msg (ECHO): {line}");
 
     Ok(msg)
 }
@@ -53,9 +51,8 @@ fn main() {
     let msg = ingress.read_init_msg().unwrap();
     egress.reply_init_msg(msg).unwrap();
 
-    for _i in 0..100 {
-        // ECHO
-        let msg = read_echo(&ingress).unwrap();
+    for line in &ingress {
+        let msg = read_echo(line).unwrap();
         reply_echo(&egress, msg).unwrap();
     }
 }
