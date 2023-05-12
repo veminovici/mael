@@ -1,4 +1,3 @@
-use anyhow::bail;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -50,7 +49,7 @@ impl Message<Init> {
         N: Node,
     {
         let Init::Init { node_id, node_ids } = &self.body.payload else {
-            bail!("expected init as the first message");
+            return Err(anyhow::anyhow!("expected init as the first message"))
         };
 
         let node = N::from_init(node_id, node_ids);
