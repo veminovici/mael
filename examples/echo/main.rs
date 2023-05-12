@@ -1,6 +1,6 @@
 use mael::{
     egress::Egress,
-    kernel::{Kernel, StdKernel},
+    kernel::StdKernel,
     message::Message,
     node::Node,
     pld,

@@ -12,8 +12,7 @@ pub trait Kernel<N>
 where
     N: Node,
 {
-    fn create_node(&self) -> anyhow::Result<N>;
-    fn run_loop(&self) -> anyhow::Result<()>;
+    fn run(&self) -> anyhow::Result<()>;
 }
 
 pub struct StdKernel<N> {
@@ -26,7 +25,11 @@ impl<N> StdKernel<N>
 where
     N: Node,
 {
-    pub fn spawn() -> Self {
+    pub fn spawn_and_run() -> anyhow::Result<()> {
+        Self::spawn().run()
+    }
+
+    fn spawn() -> Self {
         let ingress = StdIngress::spawn();
         let egress = StdEgress::spawn();
 
@@ -37,16 +40,6 @@ where
         }
     }
 
-    #[inline]
-    pub fn spawn_and_run() -> anyhow::Result<()> {
-        Self::spawn().run_loop()
-    }
-}
-
-impl<N> Kernel<N> for StdKernel<N>
-where
-    N: Node,
-{
     fn create_node(&self) -> anyhow::Result<N> {
         let msg = self.ingress.read_init_msg()?;
         match &msg.body.payload {
@@ -60,8 +53,13 @@ where
             }
         }
     }
+}
 
-    fn run_loop(&self) -> anyhow::Result<()> {
+impl<N> Kernel<N> for StdKernel<N>
+where
+    N: Node,
+{
+    fn run(&self) -> anyhow::Result<()> {
         let mut node = self.create_node()?;
 
         for line in &self.ingress {
