@@ -5,7 +5,7 @@ use mael::{
     ingress,
     message::Message,
     payload::{EgressInitExt, IngressInitExt},
-    pld,
+    pld, kernel::StdKernel,
 };
 
 pld!(
@@ -44,15 +44,14 @@ fn reply_echo(egress: &StdEgress, msg: Message<MyEcho>) -> anyhow::Result<()> {
 fn main() {
     eprintln!("Starting Echo ...");
 
-    let ingress = ingress::StdIngress::spawn();
-    let egress = egress::StdEgress::spawn();
+    let kernel = StdKernel::spawn();
 
     // Init
-    let msg = ingress.read_init_msg().unwrap();
-    egress.reply_init_msg(msg).unwrap();
+    let msg = kernel.ingress.read_init_msg().unwrap();
+    kernel.egress.reply_init_msg(msg).unwrap();
 
-    for line in &ingress {
+    for line in &kernel.ingress {
         let msg = read_echo(line).unwrap();
-        reply_echo(&egress, msg).unwrap();
+        reply_echo(&kernel.egress, msg).unwrap();
     }
 }
