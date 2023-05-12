@@ -1,7 +1,5 @@
 use std::marker::PhantomData;
 
-use anyhow::bail;
-
 use crate::{
     egress::StdEgress,
     ingress::StdIngress,
@@ -57,7 +55,7 @@ where
                 self.egress.reply_init_msg(msg)?;
                 Ok(node)
             }
-            crate::payload::Init::InitOk => bail!("We are expecting an INIT message"),
+            crate::payload::Init::InitOk => Err(anyhow::anyhow!("We are expecting an INIT message")),
         }
     }
 
