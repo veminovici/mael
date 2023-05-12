@@ -38,6 +38,11 @@ where
             phantom: PhantomData,
         }
     }
+
+    #[inline]
+    pub fn spawn_and_run() -> anyhow::Result<()> {
+        Self::spawn().run_loop()
+    }
 }
 
 impl<N> Kernel<N> for StdKernel<N>

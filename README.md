@@ -6,7 +6,7 @@ The [kernel](./src/) library implements the functionality shared by all the chal
 ```rust
 use mael::kernel::{Kernel, StdKernel};
 
-StdKernel::<YourNode>::spawn().run_loop().unwrap();
+StdKernel::<YourNode>::spawn_and_run.unwrap();
 ```
 
 ## Challenge #1: Echo

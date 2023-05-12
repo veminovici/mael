@@ -56,6 +56,5 @@ impl Node for MyNode {
 
 fn main() {
     eprintln!("Starting Echo ...");
-
-    StdKernel::<MyNode>::spawn().run_loop().unwrap();
+    StdKernel::<MyNode>::spawn_and_run().unwrap();
 }
